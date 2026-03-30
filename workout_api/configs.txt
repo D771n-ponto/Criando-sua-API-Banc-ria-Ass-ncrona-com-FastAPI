@@ -1,0 +1,8 @@
+from pydantic_settings import BaseSettings
+from pydantic import Field
+
+class Settings(BaseSettings):
+    # URL de conexão com o banco de dados (exemplo para SQLite assíncrono)
+    DB_URL: str = Field(default="sqlite+aiosqlite:///./workout.db")
+
+settings = Settings()

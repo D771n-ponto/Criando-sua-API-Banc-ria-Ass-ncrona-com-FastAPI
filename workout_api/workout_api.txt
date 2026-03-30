@@ -1,0 +1,18 @@
+workout_api/
+├── main.py                # Onde a API "nasce" (instancia o FastAPI)
+├── routers.py             # Onde você conecta todas as rotas (URLs)
+├── configs/               # Configurações gerais
+│   ├── settings.py        # Variáveis de ambiente e caminhos
+│   └── database.py        # Configuração da conexão assíncrona com o banco
+├── centro_treinamento/    # Módulo de CTs (onde os atletas treinam)
+│   ├── models.py          # Estrutura no banco de dados
+│   ├── schemas.py         # Validação de dados (Pydantic)
+│   └── controller.py      # Lógica de salvar e listar CTs
+├── categorias/            # Módulo de Categorias (Ex: Pro, Scale, Amador)
+│   ├── models.py
+│   ├── schemas.py
+│   └── controller.py
+└── atleta/                # O módulo mais importante (o desafio foca aqui)
+    ├── models.py
+    ├── schemas.py
+    └── controller.py      # Onde você cria o cadastro de atletas

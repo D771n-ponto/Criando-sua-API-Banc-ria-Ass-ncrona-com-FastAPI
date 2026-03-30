@@ -1,0 +1,47 @@
+1. models.py
+
+from sqlalchemy import Column, String, Integer
+from sqlalchemy.orm import relationship
+from workout_api.configs.database import Base
+
+class CentroTreinamentoModel(Base):
+    __tablename__ = 'centros_treinamento'
+
+    pk_id = Column(Integer, primary_key=True, autoincrement=True)
+    nome = Column(String(50), unique=True, nullable=False)
+    endereco = Column(String(60), nullable=False)
+    proprietario = Column(String(30), nullable=False)
+    
+    # Isso cria a relação: um CT pode ter vários atletas
+    atletas = relationship("AtletaModel", back_populates="centro_treinamento")
+
+2. schemas.py
+
+from pydantic import BaseModel, Field
+
+class CentroTreinamentoIn(BaseModel):
+    nome: str = Field(description='Nome do centro de treinamento', example='CT Luizalabs', max_length=20)
+    endereco: str = Field(description='Endereço do centro de treinamento', example='Rua X, 123', max_length=60)
+    proprietario: str = Field(description='Nome do proprietário', example='Danielle', max_length=30)
+
+class CentroTreinamentoOut(CentroTreinamentoIn):
+    id: int # O ID que o banco gera automaticamente
+
+3. controller.py
+
+from fastapi import APIRouter, status, HTTPException
+from workout_api.centro_treinamento.schemas import CentroTreinamentoIn, CentroTreinamentoOut
+from workout_api.centro_treinamento.models import CentroTreinamentoModel
+from workout_api.configs.database import get_session
+from sqlalchemy.future import select
+
+router = APIRouter()
+
+@router.post("/", summary="Criar um novo Centro de Treinamento", status_code=status.HTTP_201_CREATED)
+async def post_ct(db_session=get_session, centro_in: CentroTreinamentoIn = None):
+    # Aqui vai a lógica para salvar no banco de dados futuramente
+    return {"message": f"CT {centro_in.nome} criado com sucesso!"}
+
+@router.get("/", summary="Listar todos os Centros de Treinamento")
+async def get_all_cts():
+    return []

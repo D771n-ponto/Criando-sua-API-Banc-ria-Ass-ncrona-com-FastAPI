@@ -1,0 +1,72 @@
+1. models.py
+
+from datetime import datetime
+from sqlalchemy import Column, String, Integer, Float, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
+from workout_api.configs.database import Base
+
+class AtletaModel(Base):
+    __tablename__ = 'atletas'
+
+    pk_id = Column(Integer, primary_key=True, autoincrement=True)
+    nome = Column(String(50), nullable=False)
+    cpf = Column(String(11), unique=True, nullable=False)
+    idade = Column(Integer, nullable=False)
+    peso = Column(Float, nullable=False)
+    altura = Column(Float, nullable=False)
+    sexo = Column(String(1), nullable=False)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+    # Chaves Estrangeiras (Relacionando com os outros módulos)
+    categoria = relationship("CategoriaModel", back_populates="atletas")
+    categoria_id = Column(Integer, ForeignKey("categorias.pk_id"), nullable=False)
+    
+    centro_treinamento = relationship("CentroTreinamentoModel", back_populates="atletas")
+    centro_treinamento_id = Column(Integer, ForeignKey("centros_treinamento.pk_id"), nullable=False)
+
+
+2. schemas.py
+
+from pydantic import BaseModel, Field, PositiveFloat
+from typing import Annotated, Optional
+
+class AtletaIn(BaseModel):
+    nome: Annotated[str, Field(description='Nome do atleta', example='Danielle', max_length=50)]
+    cpf: Annotated[str, Field(description='CPF do atleta', example='12345678901', max_length=11)]
+    idade: Annotated[int, Field(description='Idade do atleta', example=25)]
+    peso: Annotated[PositiveFloat, Field(description='Peso do atleta', example=70.5)]
+    altura: Annotated[PositiveFloat, Field(description='Altura do atleta', example=1.70)]
+    sexo: Annotated[str, Field(description='Sexo do atleta', example='F', max_length=1)]
+    categoria_nome: str # Para o usuário enviar o nome da categoria, não o ID
+    ct_nome: str        # Para o usuário enviar o nome do CT, não o ID
+
+class AtletaOut(AtletaIn):
+    id: int
+    created_at: datetime
+
+class AtletaUpdate(BaseModel):
+    nome: Optional[str] = None
+    idade: Optional[int] = None
+
+3. controller.py
+
+
+from fastapi import APIRouter, status, HTTPException
+from workout_api.atleta.schemas import AtletaIn, AtletaOut
+from workout_api.configs.database import get_session
+from sqlalchemy.future import select
+
+router = APIRouter()
+
+@router.post("/", summary="Criar um novo atleta", status_code=status.HTTP_201_CREATED)
+async def post_atleta(db_session=get_session, atleta_in: AtletaIn = None):
+    # Lógica simplificada:
+    # 1. Buscar se a categoria_nome existe no banco
+    # 2. Buscar se o ct_nome existe no banco
+    # 3. Se tudo OK, salvar o AtletaModel
+    return {"message": f"Atleta {atleta_in.nome} cadastrado!"}
+
+@router.get("/", summary="Listar todos os atletas")
+async def get_all_atletas():
+    return []
+

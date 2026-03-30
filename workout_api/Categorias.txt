@@ -1,0 +1,46 @@
+1. models.py
+
+from sqlalchemy import Column, String, Integer
+from sqlalchemy.orm import relationship
+from workout_api.configs.database import Base
+
+class CategoriaModel(Base):
+    __tablename__ = 'categorias'
+
+    pk_id = Column(Integer, primary_key=True, autoincrement=True)
+    nome = Column(String(10), unique=True, nullable=False)
+    
+    # Relação: Uma categoria pode ter vários atletas (Ex: Categoria "Elite" tem 20 atletas)
+    atletas = relationship("AtletaModel", back_populates="categoria")
+
+
+2. schemas.py
+
+from pydantic import BaseModel, Field
+from typing import Annotated
+
+class CategoriaIn(BaseModel):
+    nome: Annotated[str, Field(description='Nome da categoria', example='Scale', max_length=10)]
+
+class CategoriaOut(CategoriaIn):
+    id: int # O ID que será retornado após a criação
+
+3. controller.py
+
+
+from fastapi import APIRouter, status, HTTPException
+from workout_api.categorias.schemas import CategoriaIn, CategoriaOut
+from workout_api.categorias.models import CategoriaModel
+from workout_api.configs.database import get_session
+from sqlalchemy.future import select
+
+router = APIRouter()
+
+@router.post("/", summary="Criar uma nova Categoria", status_code=status.HTTP_201_CREATED)
+async def post_categoria(db_session=get_session, categoria_in: CategoriaIn = None):
+    # Por enquanto, apenas um retorno de sucesso
+    return {"message": f"Categoria {categoria_in.nome} criada com sucesso!"}
+
+@router.get("/", summary="Listar todas as Categorias")
+async def get_all_categorias():
+    return []
